@@ -1,8 +1,6 @@
-import numpy as np
-
-
 def game_state(battle):
     """Returns vector representation of battle game state"""
+    # todo: The vector should be the following: [current pokemon, my team, opponent_team, available actions,
 
 
 def pokemon_vector(pokemon_name):
