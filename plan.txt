@@ -1,0 +1,21 @@
+Goal: Build a system that plays random team pokemon showdown well.
+
+Requirements for Achievement
+1. Agent must act without any human input
+2. As opposed to the DQN learning already implemented in the poke-env library docs, I'm going to use a method inspired
+by the Alphazero system by DeepMind.
+
+Deliverables
+1. Value Network
+2. Monte Carlo Tree Search for game states
+3. Preprocessing game states into appropriate vectors as inputs to model
+4. Infrastructure to deploy agent on pokemon showdown servers
+
+Plan
+1. Build simple random agent and deploy it online successfully (done)
+2. Figure out how to get an agent to play against itself (done)
+3. Figure out how to featurize game states into representations suited for training
+3. Figure out how to estimate game state values using monte carlo tree search
+4. Build neural net to predict these values
+5. Train the neural network
+6. Deploy agent onto internet
