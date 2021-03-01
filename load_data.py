@@ -24,4 +24,23 @@ def load_random_battle_moveset():
             fout.write(move + "\n")
 
 
-load_random_battle_moveset()
+def load_random_battle_itemset():
+    r = requests.get(gen8_random_battle_url)
+    items = set()
+    for item_list in map(lambda s: eval(s[7:]), re.findall(r"items: \[.*?\]", r.text)):
+        for item in item_list:
+            items.add(item)
+    with open("random_battle_itemset.txt", "w") as fout:
+        for item in sorted(items):
+            fout.write(item + "\n")
+
+
+def load_random_battle_abilityset():
+    r = requests.get(gen8_random_battle_url)
+    abilities = set()
+    for ability_list in map(lambda s: eval(s[11:]), re.findall(r"abilities: \[.*?\]", r.text)):
+        for ability in ability_list:
+            abilities.add(ability)
+    with open("random_battle_abilityset.txt", "w") as fout:
+        for ability in sorted(abilities):
+            fout.write(ability + "\n")
