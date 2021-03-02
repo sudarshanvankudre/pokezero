@@ -67,6 +67,25 @@ def base_stats_vector(bs: dict):
     return np.array([bs["hp"] / n, bs["atk"] / n, bs["def"] / n, bs["spa"] / n, bs["spd"] / n, bs["spe"] / n])
 
 
+def boosts_vector(boosts: dict):
+    n = 6
+    return np.array(
+        [boosts["accuracy"] / n, boosts["atk"] / n, boosts["def"] / n, boosts["evasion"] / n, boosts["spa"] / n,
+         boosts["spd"] / n, boosts["spe"] / n])
+
+
+def effects_vector(effect_names):
+    """Returns a one-hot encoded vector corresponding to effect_names"""
+    v = []
+    with open("effectset.txt", "r") as fin:
+        for effect in map(str.rstrip, fin):
+            if effect in effect_names:
+                v.append(1)
+            else:
+                v.append(0)
+    return np.array(v)
+
+
 def pokemon_vector(pokemon: Pokemon):
     """Given a pokemon object, return a vector representation"""
     # todo: [name, ability, active, base stats, boosts, current_hp_fraction, effects, fainted, first_turn, is_dynamaxed,
@@ -75,3 +94,11 @@ def pokemon_vector(pokemon: Pokemon):
     ability = abilities_vector([pokemon.ability])
     active = np.array([int(pokemon.active)])
     base_stats = base_stats_vector(pokemon.base_stats)
+    boosts = boosts_vector(pokemon.boosts)
+    hp = np.array([pokemon.current_hp_fraction])
+    effects = effects_vector([e.name for e in pokemon.effects])
+    fainted = np.array([int(pokemon.fainted)])
+    #first_turn = np.array([int(pokemon.first_turn)]) # todo looks like it hasn't been added yet
+    is_dynamaxed = np.array([int(pokemon.is_dynamaxed)])
+    item = item_vector(pokemon.item)
+    level = np.array([pokemon.level / 100])

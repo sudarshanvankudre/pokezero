@@ -1,8 +1,10 @@
 import re
 
 import requests
+from bs4 import BeautifulSoup
 
 gen8_random_battle_url = "https://pkmn.github.io/randbats/data/gen8randombattle.js?"
+battle_environment_url = "https://poke-env.readthedocs.io/en/stable/other_environment.html#poke_env.environment.effect.Effect"
 
 
 def load_random_battle_pool():
@@ -44,3 +46,13 @@ def load_random_battle_abilityset():
     with open("random_battle_abilityset.txt", "w") as fout:
         for ability in sorted(abilities):
             fout.write(ability + "\n")
+
+
+def load_effects():
+    r = requests.get(battle_environment_url)
+    soup = BeautifulSoup(r.text, 'html.parser').find("div",
+                                                     {"class": "section", "id": "module-poke_env.environment.effect"})
+    effects = [str(s)[23:len(s) - 8] for s in soup.find_all("code", {"class": "descname"})]
+    with open("effectset.txt", "w") as fout:
+        for effect in sorted(effects[1: len(effects) - 4]):
+            fout.write(effect + "\n")
