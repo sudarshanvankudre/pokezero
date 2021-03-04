@@ -1,4 +1,5 @@
 import numpy as np
+from poke_env.environment.move import Move
 from poke_env.environment.pokemon import Pokemon
 
 
@@ -102,3 +103,13 @@ def pokemon_vector(pokemon: Pokemon):
     is_dynamaxed = np.array([int(pokemon.is_dynamaxed)])
     item = item_vector(pokemon.item)
     level = np.array([pokemon.level / 100])
+
+def move_vector(move: Move):
+    """Given a move object, return a vector representation"""
+    # todo: [accuracy, base_power, boosts, breaks_protect, can_z_move, category, crit_ratio, current_pp, damage,
+    #   defensive category, drain, expected_hits, force_switch, heal, ignore_ability, ignore_defensive, ignore_evasion,
+    #   ignore_immunity, is_protect_counter, is_protect_move, is_side_protect_move, is_z, no_pp_boosts, non_ghost_target,
+    #   priority, recoil, self_boost, sleep_usable, stalling_move, status, steals_boosts, terrain, thaws_target, type,
+    #   use_target_offensive, weather
+    accuracy = np.array([move.accuracy])
+    power = np.array([move.base_power / 250])
