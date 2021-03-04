@@ -18,7 +18,7 @@ def load_random_battle_pool():
 def load_random_battle_moveset():
     r = requests.get(gen8_random_battle_url)
     moves = set()
-    for move_list in map(lambda s: eval(s[7:]), re.findall(r"moves: \[.*?\]", r.text)):
+    for move_list in map(lambda s: eval(s[7:]), re.findall(r"moves: \[.*?]", r.text)):
         for m in move_list:
             moves.add(m)
     with open("random_battle_moveset.txt", 'w') as fout:
@@ -29,7 +29,7 @@ def load_random_battle_moveset():
 def load_random_battle_itemset():
     r = requests.get(gen8_random_battle_url)
     items = set()
-    for item_list in map(lambda s: eval(s[7:]), re.findall(r"items: \[.*?\]", r.text)):
+    for item_list in map(lambda s: eval(s[7:]), re.findall(r"items: \[.*?]", r.text)):
         for item in item_list:
             items.add(item)
     with open("random_battle_itemset.txt", "w") as fout:
@@ -40,7 +40,7 @@ def load_random_battle_itemset():
 def load_random_battle_abilityset():
     r = requests.get(gen8_random_battle_url)
     abilities = set()
-    for ability_list in map(lambda s: eval(s[11:]), re.findall(r"abilities: \[.*?\]", r.text)):
+    for ability_list in map(lambda s: eval(s[11:]), re.findall(r"abilities: \[.*?]", r.text)):
         for ability in ability_list:
             abilities.add(ability)
     with open("random_battle_abilityset.txt", "w") as fout:
@@ -56,3 +56,6 @@ def load_effects():
     with open("effectset.txt", "w") as fout:
         for effect in sorted(effects[1: len(effects) - 4]):
             fout.write(effect + "\n")
+
+
+load_random_battle_moveset()
