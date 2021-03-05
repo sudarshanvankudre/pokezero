@@ -1,13 +1,17 @@
 import numpy as np
+from poke_env.environment.abstract_battle import AbstractBattle
 from poke_env.environment.move import Move
 from poke_env.environment.move_category import MoveCategory
 from poke_env.environment.pokemon import Pokemon
 from poke_env.environment.weather import Weather
 
 
-def game_state(battle):
+def game_state(battle: AbstractBattle):
     """Returns vector representation of battle game state"""
     # todo: The vector should be the following: [current pokemon vector, all other pokemon in team vectors, opponent pokemon, all known opponent pokemon vectors]
+    our_team = np.concatenate([pokemon_vector(p) for p in battle.team.values()])
+    opponent_team = np.concatenate([pokemon_vector(p) for p in battle.opponent_team.values()])
+    return np.concatenate((our_team, opponent_team))
 
 
 def pokemon_name_onehot_vector(pokemon_names):
