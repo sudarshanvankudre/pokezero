@@ -2,7 +2,7 @@ import numpy as np
 from poke_env.environment.move import Move
 from poke_env.environment.move_category import MoveCategory
 from poke_env.environment.pokemon import Pokemon
-from poke_env.environment.pokemon_type import PokemonType
+from poke_env.environment.weather import Weather
 
 
 def game_state(battle):
@@ -91,9 +91,6 @@ def effects_onehot_vector(effect_names):
 
 def pokemon_vector(pokemon: Pokemon):
     """Given a pokemon object, return a vector representation"""
-    # todo: [name, ability, active, base stats, boosts, current_hp_fraction, effects, fainted, first_turn, is_dynamaxed,
-    #  item, level_fraction, moves, must_recharge, possible_abilities, preparing, protect_counter, status, status_counter,
-    #  types,
     ability = abilities_onehot_vector([pokemon.ability])
     active = np.array([int(pokemon.active)])
     base_stats = base_stats_vector(pokemon.base_stats)
@@ -105,30 +102,39 @@ def pokemon_vector(pokemon: Pokemon):
     is_dynamaxed = np.array([int(pokemon.is_dynamaxed)])
     item = item_onehot_vector(pokemon.item)
     level = np.array([pokemon.level / 100])
+    moves = np.concatenate([move_vector(m) for m in pokemon.moves.values()])
+    must_recharge = np.array([int(pokemon.must_recharge)])
+    possible_abilities = abilities_onehot_vector(list(pokemon.possible_abilities.values()))
+    preparing = np.array([int(pokemon.preparing)])
+    status = status_onehot_vector(pokemon.status)
+    types = types_onehot_vector(pokemon.types)
+    return np.concatenate((ability, active, base_stats, boosts, hp, effects, fainted, is_dynamaxed, item, level, moves,
+                           must_recharge, possible_abilities, preparing, status, types))
 
 
 def category_onehot_vector(category: MoveCategory):
     """Returns a one-hot vector representation of category"""
-    if category == MoveCategory.PHYSICAL:
-        return np.array([1, 0, 0])
-    elif category == MoveCategory.SPECIAL:
-        return np.array([0, 1, 0])
-    else:
-        return np.array([0, 0, 1])
+    v = np.zeros(3)
+    v[category.value - 1] = 1
+    return v
 
 
-def type_onehot_vector(type: PokemonType):
-    """Returns a one-hot vector representation of type"""
-    types = [PokemonType.BUG, PokemonType.DARK, PokemonType.DRAGON, PokemonType.ELECTRIC, PokemonType.FAIRY]
+def types_onehot_vector(types: iter):
+    """Returns a one-hot vector representation of type(s)"""
+    v = np.zeros(18)
+    for t in types:
+        v[t.value - 1] = 1
+    return v
+
+
+def weather_onehot_vector(weather: Weather):
+    v = np.zeros(7)
+    v[weather.value - 1] = 1
+    return v
 
 
 def move_vector(move: Move):
     """Given a move object, return a vector representation"""
-    # todo: [accuracy, base_power, boosts, breaks_protect, can_z_move, category, crit_ratio, current_pp, damage,
-    #   defensive category, drain, expected_hits, force_switch, heal, ignore_ability, ignore_defensive, ignore_evasion,
-    #   ignore_immunity, is_protect_counter, is_protect_move, is_side_protect_move, is_z, no_pp_boosts, non_ghost_target,
-    #   priority, recoil, self_boost, sleep_usable, stalling_move, status, steals_boosts, terrain, thaws_target, type,
-    #   use_target_offensive, weather
     accuracy = np.array([move.accuracy])
     power = np.array([move.base_power / 250])
     boosts = boosts_vector(move.boosts)
@@ -155,4 +161,10 @@ def move_vector(move: Move):
     status = status_onehot_vector(move.status)
     steals_boosts = np.array([int(move.steals_boosts)])
     thaws_target = np.array([int(move.thaws_target)])
-    type = type_onehot_vector(move.type)
+    move_type = types_onehot_vector([move.type])
+    use_target_offensive = np.array([int(move.use_target_offensive)])
+    weather = weather_onehot_vector(move.weather)
+    return np.concatenate((accuracy, power, boosts, breaks_protect, can_z_move, category, crit_ratio, pp,
+                           defensive_category, drain, expected_hits, force_switch, heal, ignores, is_z, no_pp_boosts,
+                           non_ghost_target, priority, recoil, self_boost, sleep_usable, stalling_move, status,
+                           steals_boosts, thaws_target, move_type, use_target_offensive, weather))
