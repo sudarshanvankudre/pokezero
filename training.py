@@ -1,11 +1,10 @@
 import asyncio
 
-from poke_env.player.random_player import RandomPlayer
 from poke_env.server_configuration import LocalhostServerConfiguration
 
-from players import MaxDamagePlayer, MyRandomPlayer
+from players import MyRandomPlayer
 
-num_games = 100
+num_games = 1
 
 player1 = MyRandomPlayer(
     server_configuration=LocalhostServerConfiguration

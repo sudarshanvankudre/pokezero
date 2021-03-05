@@ -9,9 +9,9 @@ from poke_env.environment.weather import Weather
 
 def game_state(battle: AbstractBattle):
     """Returns vector representation of battle game state"""
-    our_team = np.concatenate([pokemon_vector(p) for p in battle.team.values()])
-    opponent_team = np.concatenate([pokemon_vector(p, friendly=False) for p in battle.opponent_team.values()])
-    return np.concatenate((our_team, opponent_team))
+    our_team = np.ravel([pokemon_vector(p) for p in battle.team.values()])
+    opponent_team = np.ravel([pokemon_vector(p, friendly=False) for p in battle.opponent_team.values()])
+    return np.concatenate([our_team, opponent_team])
 
 
 def status_onehot_vector(status: Status):
@@ -94,9 +94,7 @@ def pokemon_vector(pokemon: Pokemon, friendly=True):
     is_dynamaxed = np.array([int(pokemon.is_dynamaxed)])
     item = item_onehot_vector(pokemon.item)
     level = np.array([pokemon.level / 100])
-    move_vectors = [move_vector(m) for m in pokemon.moves.values()]
-    padding = np.zeros(75 - len(move_vectors))
-    moves = np.concatenate((np.ravel(move_vectors), padding))
+    moves = np.ravel([move_vector(m) for m in pokemon.moves.values()])
     must_recharge = np.array([int(pokemon.must_recharge)])
     possible_abilities = abilities_onehot_vector(list(pokemon.possible_abilities.values()))
     if type(pokemon.preparing) is tuple or pokemon.preparing:

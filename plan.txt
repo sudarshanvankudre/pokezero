@@ -8,14 +8,19 @@ by the Alphazero system by DeepMind.
 Deliverables
 1. Value Network
 2. Monte Carlo Tree Search for game states
-3. Preprocessing game states into appropriate vectors as inputs to model
-4. Infrastructure to deploy agent on pokemon showdown servers
+3. Preprocessing game states into appropriate vectors as inputs to model (done)
+4. Infrastructure to deploy agent on pokemon showdown servers (done)
 
 Plan
 1. Build simple random agent and deploy it online successfully (done)
 2. Figure out how to get an agent to play against itself (done)
-3. Figure out how to featurize game states into representations suited for training
+3. Figure out how to featurize game states into representations suited for training (done)
 3. Figure out how to estimate game state values using monte carlo tree search
 4. Build neural net to predict these values
 5. Train the neural network
 6. Deploy agent onto internet
+
+Training Approaches
+- Run playouts from different game states to estimate probability of winning from that state to train neural net (requires playout implemented, not possible yet)
+- Increment or decrement neural net guesses about "value" of (state, action) pair based on battle win or loss.
+Run some x number of battles, enough to get ~5000 training examples. Train the network on the examples and use the updated network to play another x battles.

@@ -22,5 +22,5 @@ class MaxDamagePlayer(Player):
 class MyRandomPlayer(Player):
     def choose_move(self, battle: AbstractBattle) -> BattleOrder:
         gs = game_state(battle)
-        print(gs)
+        print(battle.turn)
         return self.choose_random_move(battle)
