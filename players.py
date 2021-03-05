@@ -2,6 +2,8 @@ from poke_env.environment.abstract_battle import AbstractBattle
 from poke_env.player.battle_order import BattleOrder
 from poke_env.player.player import Player
 
+from preprocessing import game_state
+
 
 class MaxDamagePlayer(Player):
     def choose_move(self, battle: AbstractBattle) -> BattleOrder:
@@ -19,6 +21,6 @@ class MaxDamagePlayer(Player):
 
 class MyRandomPlayer(Player):
     def choose_move(self, battle: AbstractBattle) -> BattleOrder:
-        pokemon = battle.active_pokemon
-        print(battle.team)
+        gs = game_state(battle)
+        print(gs)
         return self.choose_random_move(battle)

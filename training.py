@@ -5,9 +5,9 @@ from poke_env.server_configuration import LocalhostServerConfiguration
 
 from players import MaxDamagePlayer, MyRandomPlayer
 
-num_games = 10
+num_games = 100
 
-player1 = RandomPlayer(
+player1 = MyRandomPlayer(
     server_configuration=LocalhostServerConfiguration
 )
 player2 = MyRandomPlayer(
