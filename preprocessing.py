@@ -9,9 +9,10 @@ from poke_env.environment.weather import Weather
 
 def game_state(battle: AbstractBattle):
     """Returns vector representation of battle game state"""
-    our_team = np.ravel([pokemon_vector(p) for p in battle.team.values()])
-    opponent_team = np.ravel([pokemon_vector(p, friendly=False) for p in battle.opponent_team.values()])
-    return np.concatenate([our_team, opponent_team])
+    our_team = np.concatenate([pokemon_vector(p) for p in battle.team.values()]).flatten()
+    opponent_team = np.concatenate([pokemon_vector(p, friendly=False) for p in battle.opponent_team.values()]).flatten()
+    opponent_team = np.pad(opponent_team, (0, our_team.shape[0] - opponent_team.shape[0]), 'constant', constant_values=0)
+    return np.concatenate([our_team, opponent_team]).flatten()
 
 
 def status_onehot_vector(status: Status):
@@ -94,9 +95,9 @@ def pokemon_vector(pokemon: Pokemon, friendly=True):
     is_dynamaxed = np.array([int(pokemon.is_dynamaxed)])
     item = item_onehot_vector(pokemon.item)
     level = np.array([pokemon.level / 100])
-    moves = np.ravel([move_vector(m) for m in pokemon.moves.values()])
+    moves = np.array([move_vector(m) for m in pokemon.moves.values()]).flatten()
+    moves = np.pad(moves, (0, 375 - moves.shape[0]), 'constant', constant_values=0)
     must_recharge = np.array([int(pokemon.must_recharge)])
-    possible_abilities = abilities_onehot_vector(list(pokemon.possible_abilities.values()))
     if type(pokemon.preparing) is tuple or pokemon.preparing:
         preparing = np.array([1])
     else:
@@ -104,7 +105,7 @@ def pokemon_vector(pokemon: Pokemon, friendly=True):
     status = status_onehot_vector(pokemon.status)
     types = types_onehot_vector(pokemon.types)
     return np.concatenate((ability, active, base_stats, boosts, hp, effects, fainted, is_dynamaxed, item, level, moves,
-                           must_recharge, possible_abilities, preparing, status, types))
+                           must_recharge, preparing, status, types)).flatten()
 
 
 def category_onehot_vector(category: MoveCategory):

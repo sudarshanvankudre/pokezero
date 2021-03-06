@@ -4,7 +4,7 @@ from poke_env.server_configuration import LocalhostServerConfiguration
 
 from players import MyRandomPlayer
 
-num_games = 1
+num_games = 10
 
 player1 = MyRandomPlayer(
     server_configuration=LocalhostServerConfiguration
