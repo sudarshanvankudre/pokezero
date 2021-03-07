@@ -58,4 +58,8 @@ def load_effects():
             fout.write(effect + "\n")
 
 
+load_random_battle_pool()
+load_effects()
+load_random_battle_abilityset()
+load_random_battle_itemset()
 load_random_battle_moveset()

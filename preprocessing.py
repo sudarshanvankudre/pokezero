@@ -11,7 +11,8 @@ def game_state(battle: AbstractBattle):
     """Returns vector representation of battle game state"""
     our_team = np.concatenate([pokemon_vector(p) for p in battle.team.values()]).flatten()
     opponent_team = np.concatenate([pokemon_vector(p, friendly=False) for p in battle.opponent_team.values()]).flatten()
-    opponent_team = np.pad(opponent_team, (0, our_team.shape[0] - opponent_team.shape[0]), 'constant', constant_values=0)
+    opponent_team = np.pad(opponent_team, (0, our_team.shape[0] - opponent_team.shape[0]), 'constant',
+                           constant_values=0)
     return np.concatenate([our_team, opponent_team]).flatten()
 
 
@@ -173,7 +174,6 @@ def move_vector(move: Move):
                            steals_boosts, thaws_target, move_type, use_target_offensive, weather))
 
 
-@DeprecationWarning
 def pokemon_name_onehot_vector(pokemon_names):
     """Returns a one-hot encoded vector corresponding to pokemon_names"""
     vector = []
@@ -186,7 +186,6 @@ def pokemon_name_onehot_vector(pokemon_names):
     return np.array(vector)
 
 
-@DeprecationWarning
 def moves_onehot_vector(moves):
     """Returns a one-hot encoded vector corresponding to moves"""
     vector = []

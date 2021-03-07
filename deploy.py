@@ -6,7 +6,7 @@ from poke_env.player.random_player import RandomPlayer
 from poke_env.player_configuration import PlayerConfiguration
 from poke_env.server_configuration import ShowdownServerConfiguration
 
-from players import MaxDamagePlayer, MyRandomPlayer
+from players import MaxDamagePlayer, MyRandomPlayer, PokeZero
 
 username = "pokkezero"
 password = "5&HKKFVQ9Pznd!!unYtHOyke@*SZvzMyPrdCqaEWy9wRb3tBe*Ch0r*KI$GTAoWvxhAEe#9p8aJ&VUgthEf2WgCH6Dwg^odMBOa"
@@ -26,9 +26,14 @@ my_random_player = MyRandomPlayer(
     server_configuration=ShowdownServerConfiguration
 )
 
+pokezero = PokeZero(
+    player_configuration=PlayerConfiguration(username, password),
+    server_configuration=ShowdownServerConfiguration
+)
+
 
 async def main():
-    await my_random_player.ladder(num_games)
+    await pokezero.ladder(num_games)
 
 
 if __name__ == "__main__":
