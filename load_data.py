@@ -10,7 +10,7 @@ battle_environment_url = "https://poke-env.readthedocs.io/en/stable/other_enviro
 def load_random_battle_pool():
     r = requests.get(gen8_random_battle_url)
     random_battle_pool = [s[:len(s) - 3] for s in filter(lambda s: s[0].isupper(), re.findall(r"[^ ]*?: {", r.text))]
-    with open("random_battle_pool.txt", 'w') as fout:
+    with open("random_battle_pokemonset.txt", 'w') as fout:
         for pokemon in random_battle_pool:
             fout.write(pokemon + "\n")
 

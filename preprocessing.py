@@ -1,3 +1,5 @@
+from functools import lru_cache
+
 import numpy as np
 from poke_env.environment.abstract_battle import AbstractBattle
 from poke_env.environment.move import Move
@@ -5,6 +7,8 @@ from poke_env.environment.move_category import MoveCategory
 from poke_env.environment.pokemon import Pokemon
 from poke_env.environment.status import Status
 from poke_env.environment.weather import Weather
+
+from stats import random_battle_total_pokemon, random_battle_total_moves
 
 
 def game_state(battle: AbstractBattle):
@@ -174,25 +178,27 @@ def move_vector(move: Move):
                            steals_boosts, thaws_target, move_type, use_target_offensive, weather))
 
 
-def pokemon_name_onehot_vector(pokemon_names):
+@lru_cache(maxsize=100, typed=False)
+def get_random_battle_data(data_type):
+    with open("random_battle_{}set.txt".format(data_type), "r") as fin:
+        return [s.rstrip().replace(" ", "").lower() for s in fin]
+
+
+def pokemon_species_onehot_vector(species):
     """Returns a one-hot encoded vector corresponding to pokemon_names"""
-    vector = []
-    with open("random_battle_pool.txt", "r") as fin:
-        for name in map(str.rstrip, fin):
-            if name in pokemon_names:
-                vector.append(1)
-            else:
-                vector.append(0)
-    return np.array(vector)
+    v = np.zeros(random_battle_total_pokemon())
+    for i, name in enumerate(get_random_battle_data("pokemon")):
+        if name == species:
+            v[i] = 1
+            break
+    return v
 
 
-def moves_onehot_vector(moves):
-    """Returns a one-hot encoded vector corresponding to moves"""
-    vector = []
-    with open("random_battle_moveset.txt", "r") as fin:
-        for move in map(str.rstrip, fin):
-            if move in moves:
-                vector.append(1)
-            else:
-                vector.append(0)
-    return np.array(vector)
+def move_name_onehot_vector(move):
+    """Returns a one-hot encoded vector corresponding to move"""
+    v = np.zeros(random_battle_total_moves())
+    for i, m in enumerate(get_random_battle_data("move")):
+        if m == move:
+            v[i] = 1
+            break
+    return v
