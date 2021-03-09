@@ -37,7 +37,7 @@ async def main():
 def play_train_loop(p1=None, p2=None, n=1, model=None, training_cycles=1):
     p1_battles_won = 0
     p2_battles_won = 0
-    criterion = nn.CrossEntropyLoss()
+    criterion = nn.MSELoss()
     optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
     for _ in range(training_cycles):
         # play
@@ -72,14 +72,17 @@ def play_train_loop(p1=None, p2=None, n=1, model=None, training_cycles=1):
             labels[i] = v
             i += 1
         for epoch in range(1):
+            print(epoch)
             optimizer.zero_grad()
+            print('calculating outputs...')
             outputs = model(torch.from_numpy(np.array(inputs)).float())
-            loss = criterion(outputs, labels)
+            loss = criterion(outputs, torch.Tensor(labels).reshape_as(outputs))
+            print('backpropagating...')
             loss.backward()
             optimizer.step()
 
 
-play_train_loop(model=net)
+play_train_loop(model=net, training_cycles=2)
 
 
 def learn(model, x, y):
