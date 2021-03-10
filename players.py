@@ -52,11 +52,11 @@ def get_model_input(gs, action_vector):
 
 
 class PokeZero(Player):
-    def __init__(self, server_configuration, net, p=0.1):
+    def __init__(self, server_configuration, net, exploration=0.1):
         super().__init__(server_configuration=server_configuration)
         self.predictions = Counter()
         self.model = net
-        self.random_move_chance = p
+        self.random_move_chance = exploration
 
     def choose_move(self, battle: AbstractBattle) -> BattleOrder:
         gs = game_state(battle)  # 9828

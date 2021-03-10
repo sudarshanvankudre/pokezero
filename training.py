@@ -44,6 +44,8 @@ def play_train_loop(n=1, model=None, training_cycles=1):
     criterion = nn.MSELoss()
     optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
     losses = []
+    running_avg_loss = 0
+    optimizer.zero_grad()
     for cycle in range(training_cycles):
         print("battle {}".format(cycle))
         # play
@@ -52,7 +54,7 @@ def play_train_loop(n=1, model=None, training_cycles=1):
                 asyncio.get_event_loop().run_until_complete(main())
 
             # update predictions
-            print("updating predictions")
+            # print("updating predictions")
             if pokezero1.n_won_battles == p1_battles_won + 1:
                 for gs_action in pokezero1.predictions:
                     pokezero1.predictions[gs_action] += 1
@@ -67,7 +69,7 @@ def play_train_loop(n=1, model=None, training_cycles=1):
                 p2_battles_won = pokezero2.n_won_battles
 
             # get training data
-            print("preprocessing new data")
+            # print("preprocessing new data")
             inputs = np.empty((len(pokezero1.predictions) + len(pokezero2.predictions), gs_action.shape[0]))
             labels = np.empty(len(pokezero1.predictions) + len(pokezero2.predictions))
             i = 0
@@ -80,15 +82,17 @@ def play_train_loop(n=1, model=None, training_cycles=1):
                 labels[i] = v
                 i += 1
             for epoch in range(1):
-                optimizer.zero_grad()
-                print('calculating outputs...')
+                # print('calculating outputs...')
                 outputs = model(torch.from_numpy(np.array(inputs)).float())
                 loss = criterion(outputs, torch.Tensor(labels).reshape_as(outputs))
-                print(loss)
-                print("loss", loss)
-                print('backpropagating...')
+                losses.append(float(loss))
+                running_avg_loss = (running_avg_loss + float(loss)) / len(losses)
+                print("Running average loss:", running_avg_loss)
+                # print(loss)
+                # print("loss", loss)
+                # print('backpropagating...')
                 loss.backward()
-                print('optimizing')
+                # print('optimizing')
                 optimizer.step()
         except Exception as e:
             print("cycle failed")
@@ -97,7 +101,7 @@ def play_train_loop(n=1, model=None, training_cycles=1):
         print('model saved')
 
 
-play_train_loop(model=net, training_cycles=100)
+play_train_loop(model=net, training_cycles=1000)
 
 
 def learn(model, x, y):

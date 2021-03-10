@@ -11,7 +11,7 @@ from players import MaxDamagePlayer, MyRandomPlayer, PokeZeroField
 
 username = "pokkezero"
 password = "5&HKKFVQ9Pznd!!unYtHOyke@*SZvzMyPrdCqaEWy9wRb3tBe*Ch0r*KI$GTAoWvxhAEe#9p8aJ&VUgthEf2WgCH6Dwg^odMBOa"
-num_games = 5
+num_games = 100
 
 random_player = RandomPlayer(
     player_configuration=PlayerConfiguration(username, password),
@@ -38,5 +38,6 @@ async def main():
     await pokezero_field.ladder(num_games)
 
 
-if __name__ == "__main__":
-    asyncio.get_event_loop().run_until_complete(main())
+asyncio.get_event_loop().run_until_complete(main())
+
+print(f"Pokezero won {pokezero_field.n_won_battles}/{num_games} battles")

@@ -101,7 +101,10 @@ def pokemon_vector(pokemon: Pokemon, friendly=True):
     item = item_onehot_vector(pokemon.item)
     level = np.array([pokemon.level / 100])
     moves = np.array([move_vector(m) for m in pokemon.moves.values()]).flatten()
-    moves = np.pad(moves, (0, 375 - moves.shape[0]), 'constant', constant_values=0)
+    try:
+        moves = np.pad(moves, (0, 375 - moves.shape[0]), 'constant', constant_values=0)
+    except ValueError as e:
+        raise e
     must_recharge = np.array([int(pokemon.must_recharge)])
     if type(pokemon.preparing) is tuple or pokemon.preparing:
         preparing = np.array([1])
