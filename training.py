@@ -1,3 +1,4 @@
+import argparse
 import asyncio
 
 import numpy as np
@@ -7,17 +8,20 @@ from poke_env.server_configuration import LocalhostServerConfiguration
 from torch import nn
 
 from model import PokeNet
-from players import MyRandomPlayer, PokeZero
+from players import PokeZero
+
+parser = argparse.ArgumentParser(description='Use new or continue from saved')
+parser.add_argument('-n', '--new', help="use brand new model", action="store_true")
+args = parser.parse_args()
+
+if args.new:
+    print("initializing new model")
+    net = PokeNet()
+else:
+    print("using saved model")
+    net = torch.load("fc_model.pt")
 
 num_games = 1
-net = PokeNet()
-
-player1 = MyRandomPlayer(
-    server_configuration=LocalhostServerConfiguration
-)
-player2 = MyRandomPlayer(
-    server_configuration=LocalhostServerConfiguration
-)
 
 pokezero1 = PokeZero(
     server_configuration=LocalhostServerConfiguration,
@@ -34,55 +38,66 @@ async def main():
     await pokezero1.battle_against(pokezero2, num_games)
 
 
-def play_train_loop(p1=None, p2=None, n=1, model=None, training_cycles=1):
+def play_train_loop(n=1, model=None, training_cycles=1):
     p1_battles_won = 0
     p2_battles_won = 0
     criterion = nn.MSELoss()
     optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
-    for _ in range(training_cycles):
+    losses = []
+    for cycle in range(training_cycles):
+        print("battle {}".format(cycle))
         # play
-        print('beginning play')
-        for _ in range(n):
-            asyncio.get_event_loop().run_until_complete(main())
+        try:
+            for _ in range(n):
+                asyncio.get_event_loop().run_until_complete(main())
 
-        # update predictions
-        if pokezero1.n_won_battles == p1_battles_won + 1:
-            for gs_action in pokezero1.predictions:
-                pokezero1.predictions[gs_action] += 1
-            for gs_action in pokezero2.predictions:
-                pokezero2.predictions[gs_action] -= 1
-            p1_battles_won = pokezero1.n_won_battles
-        elif pokezero2.n_won_battles == p2_battles_won + 1:
-            for gs_action in pokezero2.predictions:
-                pokezero2.predictions[gs_action] += 1
-            for gs_action in pokezero1.predictions:
-                pokezero1.predictions[gs_action] -= 1
-            p2_battles_won = pokezero2.n_won_battles
+            # update predictions
+            print("updating predictions")
+            if pokezero1.n_won_battles == p1_battles_won + 1:
+                for gs_action in pokezero1.predictions:
+                    pokezero1.predictions[gs_action] += 1
+                for gs_action in pokezero2.predictions:
+                    pokezero2.predictions[gs_action] -= 1
+                p1_battles_won = pokezero1.n_won_battles
+            elif pokezero2.n_won_battles == p2_battles_won + 1:
+                for gs_action in pokezero2.predictions:
+                    pokezero2.predictions[gs_action] += 1
+                for gs_action in pokezero1.predictions:
+                    pokezero1.predictions[gs_action] -= 1
+                p2_battles_won = pokezero2.n_won_battles
 
-        # get training data
-        inputs = np.empty((len(pokezero1.predictions) + len(pokezero2.predictions), gs_action.shape[0]))
-        labels = np.empty(len(pokezero1.predictions) + len(pokezero2.predictions))
-        i = 0
-        for k, v in pokezero1.predictions.items():
-            inputs[i] = k
-            labels[i] = v
-            i += 1
-        for k, v in pokezero2.predictions.items():
-            inputs[i] = k
-            labels[i] = v
-            i += 1
-        for epoch in range(1):
-            print(epoch)
-            optimizer.zero_grad()
-            print('calculating outputs...')
-            outputs = model(torch.from_numpy(np.array(inputs)).float())
-            loss = criterion(outputs, torch.Tensor(labels).reshape_as(outputs))
-            print('backpropagating...')
-            loss.backward()
-            optimizer.step()
+            # get training data
+            print("preprocessing new data")
+            inputs = np.empty((len(pokezero1.predictions) + len(pokezero2.predictions), gs_action.shape[0]))
+            labels = np.empty(len(pokezero1.predictions) + len(pokezero2.predictions))
+            i = 0
+            for k, v in pokezero1.predictions.items():
+                inputs[i] = k
+                labels[i] = v
+                i += 1
+            for k, v in pokezero2.predictions.items():
+                inputs[i] = k
+                labels[i] = v
+                i += 1
+            for epoch in range(1):
+                optimizer.zero_grad()
+                print('calculating outputs...')
+                outputs = model(torch.from_numpy(np.array(inputs)).float())
+                loss = criterion(outputs, torch.Tensor(labels).reshape_as(outputs))
+                print(loss)
+                print("loss", loss)
+                print('backpropagating...')
+                loss.backward()
+                print('optimizing')
+                optimizer.step()
+        except Exception as e:
+            print("cycle failed")
+            print(e)
+        torch.save(model, "fc_model.pt")
+        print('model saved')
 
 
-play_train_loop(model=net, training_cycles=2)
+play_train_loop(model=net, training_cycles=100)
 
 
 def learn(model, x, y):

@@ -2,15 +2,16 @@
 
 import asyncio
 
+import torch
 from poke_env.player.random_player import RandomPlayer
 from poke_env.player_configuration import PlayerConfiguration
 from poke_env.server_configuration import ShowdownServerConfiguration
 
-from players import MaxDamagePlayer, MyRandomPlayer, PokeZero
+from players import MaxDamagePlayer, MyRandomPlayer, PokeZeroField
 
 username = "pokkezero"
 password = "5&HKKFVQ9Pznd!!unYtHOyke@*SZvzMyPrdCqaEWy9wRb3tBe*Ch0r*KI$GTAoWvxhAEe#9p8aJ&VUgthEf2WgCH6Dwg^odMBOa"
-num_games = 2
+num_games = 5
 
 random_player = RandomPlayer(
     player_configuration=PlayerConfiguration(username, password),
@@ -26,14 +27,15 @@ my_random_player = MyRandomPlayer(
     server_configuration=ShowdownServerConfiguration
 )
 
-pokezero = PokeZero(
+pokezero_field = PokeZeroField(
     player_configuration=PlayerConfiguration(username, password),
-    server_configuration=ShowdownServerConfiguration
+    server_configuration=ShowdownServerConfiguration,
+    net=torch.load("fc_model.pt")
 )
 
 
 async def main():
-    await pokezero.ladder(num_games)
+    await pokezero_field.ladder(num_games)
 
 
 if __name__ == "__main__":
