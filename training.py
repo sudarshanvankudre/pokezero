@@ -1,25 +1,37 @@
 import argparse
 import asyncio
 
-import numpy as np
+import matplotlib.pyplot as plt
 import torch
 import torch.optim as optim
 from poke_env.server_configuration import LocalhostServerConfiguration
 from torch import nn
 
-from model import PokeNet
+from model import FCPokeNet, ConvPokeNet
 from players import PokeZero
 
 parser = argparse.ArgumentParser(description='Use new or continue from saved')
 parser.add_argument('-n', '--new', help="use brand new model", action="store_true")
+parser.add_argument('-fc', help="use fully connected model", action="store_true")
+parser.add_argument('-conv', help="use convolutional network", action="store_true")
 args = parser.parse_args()
 
 if args.new:
     print("initializing new model")
-    net = PokeNet()
+    if args.fc:
+        print("using fully_connected_model")
+        net = FCPokeNet()
+    elif args.conv:
+        print("using convolutional model")
+        net = ConvPokeNet()
 else:
     print("using saved model")
-    net = torch.load("fc_model.pt")
+    if args.fc:
+        print("using fully_connected_model")
+        net = torch.load("fc_model.pt")
+    elif args.conv:
+        print("using convolutional model")
+        net = torch.load("conv_model.pt")
 
 num_games = 1
 
@@ -38,7 +50,7 @@ async def main():
     await pokezero1.battle_against(pokezero2, num_games)
 
 
-def play_train_loop(n=1, model=None, training_cycles=1):
+def play_train_loop(n=1, model=None, training_cycles=1, model_type="conv"):
     p1_battles_won = 0
     p2_battles_won = 0
     criterion = nn.MSELoss()
@@ -70,20 +82,21 @@ def play_train_loop(n=1, model=None, training_cycles=1):
 
             # get training data
             # print("preprocessing new data")
-            inputs = np.empty((len(pokezero1.predictions) + len(pokezero2.predictions), gs_action.shape[0]))
-            labels = np.empty(len(pokezero1.predictions) + len(pokezero2.predictions))
+            inputs = torch.empty(len(pokezero1.predictions) + len(pokezero2.predictions), 1, gs_action.shape[2])
+            labels = torch.empty(len(pokezero1.predictions) + len(pokezero2.predictions))
             i = 0
             for k, v in pokezero1.predictions.items():
                 inputs[i] = k
-                labels[i] = v
+                labels[i] = float(v)
                 i += 1
             for k, v in pokezero2.predictions.items():
                 inputs[i] = k
-                labels[i] = v
+                labels[i] = float(v)
                 i += 1
             for epoch in range(1):
                 # print('calculating outputs...')
-                outputs = model(torch.from_numpy(np.array(inputs)).float())
+                # x = torch.unsqueeze(torch.from_numpy(np.array(inputs)).float(), 1)
+                outputs = model(inputs)
                 loss = criterion(outputs, torch.Tensor(labels).reshape_as(outputs))
                 losses.append(float(loss))
                 running_avg_loss = (running_avg_loss + float(loss)) / len(losses)
@@ -96,14 +109,14 @@ def play_train_loop(n=1, model=None, training_cycles=1):
                 optimizer.step()
         except Exception as e:
             print("cycle failed")
-            print(e)
-        torch.save(model, "fc_model.pt")
+            raise e
+        if model_type == "conv":
+            torch.save(model, "conv_model.pt")
+        elif model_type == "fc":
+            torch.save(model, "fc_model.pt")
         print('model saved')
+    plt.plot(losses)
+    plt.show()
 
 
-play_train_loop(model=net, training_cycles=1000)
-
-
-def learn(model, x, y):
-    """Trains model on x, y data and returns modified model"""
-    pass
+play_train_loop(model=net, training_cycles=10)

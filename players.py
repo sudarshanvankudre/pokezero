@@ -47,7 +47,8 @@ def get_model_input(gs, action_vector):
     model_input = np.concatenate((gs, action_vector))
     model_input = np.pad(model_input, (0, action_vector_max_size - model_input.shape[0]), 'constant',
                          constant_values=0)
-    model_input = torch.from_numpy(model_input)
+    model_input = torch.unsqueeze(torch.unsqueeze(torch.from_numpy(model_input), 0), 0).float()
+    # model_input = torch.from_numpy(model_input)
     return model_input.float()
 
 
