@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import argparse
 import asyncio
 
 import torch
@@ -7,7 +8,17 @@ from poke_env.server_configuration import LocalhostServerConfiguration
 
 from players import PokeZeroField, MaxDamagePlayer
 
-net = torch.load("fc_model.pt")
+parser = argparse.ArgumentParser(
+    description="Use convolutional or fully connected model")
+parser.add_argument('-conv', help="use convolutional model",
+                    action="store_true")
+args = parser.parse_args()
+if args.conv:
+    print("using saved convolutional model")
+    net = torch.load("conv_model.pt")
+else:
+    print("using saved fully connected model")
+    net = torch.load("fc_model.pt")
 
 pokezero = PokeZeroField(
     server_configuration=LocalhostServerConfiguration,

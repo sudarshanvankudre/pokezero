@@ -23,7 +23,8 @@ class MaxDamagePlayer(Player):
             print(move)
             print(move.terrain)
         if battle.available_moves:
-            best_move = max(battle.available_moves, key=lambda move: move.base_power)
+            best_move = max(battle.available_moves,
+                            key=lambda move: move.base_power)
             return self.create_order(best_move)
         else:
             return self.choose_random_move(battle)
@@ -43,17 +44,18 @@ def get_action_vector(action):
 
 
 def get_model_input(gs, action_vector):
-    action_vector_max_size = 10197
+    action_vector_max_size = 11997
     model_input = np.concatenate((gs, action_vector))
     model_input = np.pad(model_input, (0, action_vector_max_size - model_input.shape[0]), 'constant',
                          constant_values=0)
-    model_input = torch.unsqueeze(torch.unsqueeze(torch.from_numpy(model_input), 0), 0).float()
+    model_input = torch.unsqueeze(torch.unsqueeze(
+        torch.from_numpy(model_input), 0), 0).float()
     # model_input = torch.from_numpy(model_input)
     return model_input.float()
 
 
 class PokeZero(Player):
-    def __init__(self, server_configuration, net, exploration=0.1):
+    def __init__(self, server_configuration, net, exploration=0.3):
         super().__init__(server_configuration=server_configuration)
         self.predictions = Counter()
         self.model = net
@@ -66,8 +68,14 @@ class PokeZero(Player):
         best_value = -float('inf')
         given_actions = battle.available_moves + battle.available_switches
         if random.random() < self.random_move_chance:
-            best_action = random.choice(given_actions)
-            best_gs_action = get_model_input(gs, get_action_vector(best_action))
+            try:
+                best_action = random.choice(given_actions)
+            except IndexError:
+                print(len(given_actions))
+                print(given_actions)
+                return self.choose_random_move(battle)
+            best_gs_action = get_model_input(
+                gs, get_action_vector(best_action))
             best_value = self.model(best_gs_action)
         else:
             for action in given_actions:
@@ -84,24 +92,18 @@ class PokeZero(Player):
 
 class PokeZeroField(Player):
     def __init__(self, server_configuration, net, player_configuration=None):
-        super().__init__(server_configuration=server_configuration, player_configuration=player_configuration)
+        super().__init__(server_configuration=server_configuration,
+                         player_configuration=player_configuration)
         self.model = net
 
     def choose_move(self, battle: AbstractBattle) -> BattleOrder:
-        action_vector_max_size = 10197
         gs = game_state(battle)  # 9828
         best_action = None
         best_value = -float('inf')
         given_actions = battle.available_moves + battle.available_switches
         for action in given_actions:
-            if type(action) is Move:
-                action_vector = move_name_onehot_vector(action.id)
-            else:
-                action_vector = pokemon_species_onehot_vector(action.species)
-            model_input = np.concatenate((gs, action_vector))
-            model_input = np.pad(model_input, (0, action_vector_max_size - model_input.shape[0]), 'constant',
-                                 constant_values=0)
-            model_input = torch.from_numpy(model_input)
+            action_vector = get_action_vector(action)
+            model_input = get_model_input(gs, action_vector)
             value = self.model(model_input.float())
             if value > best_value:
                 best_action = action
