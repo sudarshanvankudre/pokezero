@@ -13,8 +13,10 @@ from stats import random_battle_total_pokemon, random_battle_total_moves
 
 def game_state(battle: AbstractBattle):
     """Returns vector representation of battle game state"""
-    our_team = np.concatenate([pokemon_vector(p) for p in battle.team.values()]).flatten()
-    opponent_team = np.concatenate([pokemon_vector(p, friendly=False) for p in battle.opponent_team.values()]).flatten()
+    our_team = np.concatenate([pokemon_vector(p)
+                               for p in battle.team.values()]).flatten()
+    opponent_team = np.concatenate([pokemon_vector(
+        p, friendly=False) for p in battle.opponent_team.values()]).flatten()
     opponent_team = np.pad(opponent_team, (0, our_team.shape[0] - opponent_team.shape[0]), 'constant',
                            constant_values=0)
     return np.concatenate([our_team, opponent_team]).flatten()
@@ -100,11 +102,14 @@ def pokemon_vector(pokemon: Pokemon, friendly=True):
     is_dynamaxed = np.array([int(pokemon.is_dynamaxed)])
     item = item_onehot_vector(pokemon.item)
     level = np.array([pokemon.level / 100])
-    moves = np.array([move_vector(m) for m in pokemon.moves.values()]).flatten()
+    moves = np.array([move_vector(m)
+                      for m in pokemon.moves.values()]).flatten()
     try:
-        moves = np.pad(moves, (0, 525 - moves.shape[0]), 'constant', constant_values=0)
+        moves = np.pad(
+            moves, (0, 600 - moves.shape[0]), 'constant', constant_values=0)
     except ValueError as e:
         print(moves.shape[0])
+        print(len(pokemon.moves))
         raise e
     must_recharge = np.array([int(pokemon.must_recharge)])
     if type(pokemon.preparing) is tuple or pokemon.preparing:
@@ -147,35 +152,36 @@ def weather_onehot_vector(weather: Weather):
 
 def move_vector(move: Move):
     """Given a move object, return a vector representation"""
-    accuracy = np.array([move.accuracy])
-    power = np.array([move.base_power / 250])
-    boosts = boosts_vector(move.boosts)
-    breaks_protect = np.array([int(move.breaks_protect)])
-    can_z_move = np.array([int(move.can_z_move)])
-    category = category_onehot_vector(move.category)
-    crit_ratio = np.array([move.crit_ratio / 6])
-    pp = np.array([move.current_pp / move.max_pp])
-    defensive_category = category_onehot_vector(move.defensive_category)
-    drain = np.array([move.drain])
-    expected_hits = np.array([move.expected_hits])
-    force_switch = np.array([int(move.force_switch)])
-    heal = np.array([move.heal])
+    # max total size is 75
+    accuracy = np.array([move.accuracy])  # 1
+    power = np.array([move.base_power / 250])  # 1
+    boosts = boosts_vector(move.boosts)  # 7
+    breaks_protect = np.array([int(move.breaks_protect)])  # 1
+    can_z_move = np.array([int(move.can_z_move)])  # 1
+    category = category_onehot_vector(move.category)  # 3
+    crit_ratio = np.array([move.crit_ratio / 6])  # 1
+    pp = np.array([move.current_pp / move.max_pp])  # 1
+    defensive_category = category_onehot_vector(move.defensive_category)  # 3
+    drain = np.array([move.drain])  # 1
+    expected_hits = np.array([move.expected_hits])  # 1
+    force_switch = np.array([int(move.force_switch)])  # 1
+    heal = np.array([move.heal])  # 1
     ignores = np.array(
-        [int(move.ignore_ability), int(move.ignore_defensive), int(move.ignore_evasion)])
-    is_z = np.array([int(move.is_z)])
-    no_pp_boosts = np.array([int(move.no_pp_boosts)])
-    non_ghost_target = np.array([int(move.non_ghost_target)])
-    priority = np.array([move.priority / 5])
-    recoil = np.array([move.recoil])
-    self_boost = boosts_vector(move.self_boost)
-    sleep_usable = np.array([int(move.sleep_usable)])
-    stalling_move = np.array([int(move.stalling_move)])
-    status = status_onehot_vector(move.status)
-    steals_boosts = np.array([int(move.steals_boosts)])
-    thaws_target = np.array([int(move.thaws_target)])
-    move_type = types_onehot_vector([move.type])
-    use_target_offensive = np.array([int(move.use_target_offensive)])
-    weather = weather_onehot_vector(move.weather)
+        [int(move.ignore_ability), int(move.ignore_defensive), int(move.ignore_evasion)])  # 3
+    is_z = np.array([int(move.is_z)])  # 1
+    no_pp_boosts = np.array([int(move.no_pp_boosts)])  # 1
+    non_ghost_target = np.array([int(move.non_ghost_target)])  # 1
+    priority = np.array([move.priority / 5])  # 1
+    recoil = np.array([move.recoil])  # 1
+    self_boost = boosts_vector(move.self_boost)  # 7
+    sleep_usable = np.array([int(move.sleep_usable)])  # 1
+    stalling_move = np.array([int(move.stalling_move)])  # 1
+    status = status_onehot_vector(move.status)  # 7
+    steals_boosts = np.array([int(move.steals_boosts)])  # 1
+    thaws_target = np.array([int(move.thaws_target)])  # 1
+    move_type = types_onehot_vector([move.type])  # 18
+    use_target_offensive = np.array([int(move.use_target_offensive)])  # 1
+    weather = weather_onehot_vector(move.weather)  # 7
     return np.concatenate((accuracy, power, boosts, breaks_protect, can_z_move, category, crit_ratio, pp,
                            defensive_category, drain, expected_hits, force_switch, heal, ignores, is_z, no_pp_boosts,
                            non_ghost_target, priority, recoil, self_boost, sleep_usable, stalling_move, status,
