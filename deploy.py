@@ -7,11 +7,11 @@ from poke_env.player.random_player import RandomPlayer
 from poke_env.player_configuration import PlayerConfiguration
 from poke_env.server_configuration import ShowdownServerConfiguration
 
-from players import MaxDamagePlayer, MyRandomPlayer, PokeZeroField
+from players import MaxDamagePlayer, MyRandomPlayer, PokeZeroBattle
 
 username = "pokkezero"
 password = "5&HKKFVQ9Pznd!!unYtHOyke@*SZvzMyPrdCqaEWy9wRb3tBe*Ch0r*KI$GTAoWvxhAEe#9p8aJ&VUgthEf2WgCH6Dwg^odMBOa"
-num_games = 100
+num_games = 5
 
 random_player = RandomPlayer(
     player_configuration=PlayerConfiguration(username, password),
@@ -27,10 +27,10 @@ my_random_player = MyRandomPlayer(
     server_configuration=ShowdownServerConfiguration
 )
 
-pokezero_field = PokeZeroField(
+pokezero_field = PokeZeroBattle(
     player_configuration=PlayerConfiguration(username, password),
     server_configuration=ShowdownServerConfiguration,
-    net=torch.load("fc_model.pt")
+    net=torch.load("conv_model.pt")
 )
 
 
