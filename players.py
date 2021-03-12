@@ -69,12 +69,16 @@ class PokeZero(Player):
 
 
 class PokeZeroTrain(PokeZero):
-    def __init__(self, server_configuration, net, exploration=0.3):
+    def __init__(self, server_configuration, net, exploration=1, decay=1):
         super().__init__(server_configuration=server_configuration, net=net)
         self.predictions = Counter()
-        self.random_move_chance = exploration
+        self.exploration = exploration
+        self.exploration_decay = decay
 
     def choose_move(self, battle: AbstractBattle) -> BattleOrder:
+        if battle.turn == 1:
+            # print(f"exploration: {self.exploration}")
+            self.exploration *= self.exploration_decay
         self.model.eval()
         gs = game_state(battle)  # 9828
         best_action = None
@@ -83,7 +87,7 @@ class PokeZeroTrain(PokeZero):
         given_actions = battle.available_moves + battle.available_switches
         if len(given_actions) == 0:
             return self.choose_random_move(battle)
-        if random.random() < self.random_move_chance:
+        if random.random() < self.exploration:
             try:
                 best_action = random.choice(given_actions)
             except IndexError:

@@ -59,7 +59,6 @@ class ResLayer(nn.Module):
         self.batchnorm = nn.BatchNorm1d(filter_size)
         self.conv2 = nn.Conv1d(filter_size, filter_size, kernel_size)
         self.pool2 = nn.MaxPool1d(4)
-        self.skip = nn.Identity()
 
     def forward(self, x):
         res = x
@@ -109,4 +108,3 @@ class ValueHead(nn.Module):
         x = torch.reshape(x, (n, x.shape[1] * x.shape[2]))
         x = self.tanh(self.fc2(F.relu(self.fc1(x))))
         return x
-

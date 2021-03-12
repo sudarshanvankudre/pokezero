@@ -1,5 +1,6 @@
 import argparse
 import asyncio
+import random
 
 import matplotlib.pyplot as plt
 import torch
@@ -52,12 +53,16 @@ num_games = 1
 
 pokezero1 = PokeZeroTrain(
     server_configuration=LocalhostServerConfiguration,
-    net=net
+    net=net,
+    exploration=1,
+    decay=0.99
 )
 
 pokezero2 = PokeZeroTrain(
     server_configuration=LocalhostServerConfiguration,
-    net=net
+    net=net,
+    exploration=1,
+    decay=0.99
 )
 
 
@@ -67,14 +72,14 @@ async def main():
 
 def update_predictions(p1, p2, p1_battles_won, p2_battles_won):
     if p1.n_won_battles == p1_battles_won + 1:
-        for gs_action in p1.predictions:
-            p1.predictions[gs_action] += 1
+        # for gs_action in p1.predictions:
+        #     p1.predictions[gs_action] += 1
         for gs_action in p2.predictions:
             p2.predictions[gs_action] -= 1
         p1_battles_won = p1.n_won_battles
     elif p2.n_won_battles == p2_battles_won + 1:
-        for gs_action in p2.predictions:
-            p2.predictions[gs_action] += 1
+        # for gs_action in p2.predictions:
+        #     p2.predictions[gs_action] += 1
         for gs_action in p1.predictions:
             p1.predictions[gs_action] -= 1
         p2_battles_won = p2.n_won_battles
@@ -123,10 +128,10 @@ def graph_losses(losses):
 def play_train_loop(model=None, training_cycles=1, model_type="fc"):
     p1_battles_won = 0
     p2_battles_won = 0
-    loss_fn = nn.MSELoss(reduction="sum")
+    loss_fn = nn.MSELoss()
     # optimizer = optim.SGD(model.parameters(), lr=1e-6, momentum=0.9)
     # optimizer = optim.Adadelta(model.parameters())
-    optimizer = optim.Adam(list(model.parameters()), lr=1e-4)
+    optimizer = optim.Adam(list(model.parameters()), lr=1e-5)
     scheduler = StepLR(optimizer, 100)
     losses = []
     for cycle in range(training_cycles):
