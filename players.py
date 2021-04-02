@@ -69,17 +69,22 @@ class PokeZero(Player):
 
 
 class PokeZeroStudent(PokeZero):
-    def __init__(self, server_config, net, server_configuration):
-        super().__init__(server_configuration, net)
-        self.results = set()
+    def __init__(self, server_config, net):
+        super().__init__(server_config, net)
+        self.gs_actions = list()
 
     def choose_move(self, battle: AbstractBattle) -> BattleOrder:
         self.model.eval()
-        gs = game_state(battle)  # 9828
+        if battle.turn > 500:
+            return self.choose_random_move(battle)
+        gs = game_state(battle)
         best_action = None
         best_gs_action = None
         best_value = -float('inf')
-        given_actions = battle.available_moves + battle.available_switches
+        if battle.trapped:
+            given_actions = battle.available_moves
+        else:
+            given_actions = battle.available_moves + battle.available_switches
         if len(given_actions) == 0:
             return self.choose_random_move(battle)
         for action in given_actions:
@@ -91,13 +96,8 @@ class PokeZeroStudent(PokeZero):
                 best_action = action
                 best_gs_action = model_input
                 best_value = value
-        if best_gs_action in self.results:
-            print("What are the odds?")
-        self.results.add(best_gs_action)
+        self.gs_actions.append(best_gs_action)
         return self.create_order(best_action)
-
-
-
 
 
 class PokeZeroTrain(PokeZero):
