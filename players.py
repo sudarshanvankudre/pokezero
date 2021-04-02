@@ -8,7 +8,7 @@ from poke_env.environment.move import Move
 from poke_env.player.battle_order import BattleOrder
 from poke_env.player.player import Player
 
-from preprocessing import game_state, move_name_onehot_vector, pokemon_species_onehot_vector
+from dataloader.preprocessing import game_state, move_name_onehot_vector, pokemon_species_onehot_vector
 from stats import random_battle_total_pokemon, random_battle_total_moves
 
 num_pokemon = random_battle_total_pokemon()
@@ -66,6 +66,38 @@ class PokeZero(Player):
 
     def choose_move(self, battle: AbstractBattle) -> BattleOrder:
         pass
+
+
+class PokeZeroStudent(PokeZero):
+    def __init__(self, server_config, net, server_configuration):
+        super().__init__(server_configuration, net)
+        self.results = set()
+
+    def choose_move(self, battle: AbstractBattle) -> BattleOrder:
+        self.model.eval()
+        gs = game_state(battle)  # 9828
+        best_action = None
+        best_gs_action = None
+        best_value = -float('inf')
+        given_actions = battle.available_moves + battle.available_switches
+        if len(given_actions) == 0:
+            return self.choose_random_move(battle)
+        for action in given_actions:
+            action_vector = get_action_vector(action)
+            model_input = self.get_model_input(gs, action_vector)
+            with torch.no_grad():
+                value = self.model(model_input)
+            if value > best_value:
+                best_action = action
+                best_gs_action = model_input
+                best_value = value
+        if best_gs_action in self.results:
+            print("What are the odds?")
+        self.results.add(best_gs_action)
+        return self.create_order(best_action)
+
+
+
 
 
 class PokeZeroTrain(PokeZero):
