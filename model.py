@@ -21,9 +21,9 @@ class FCPokeNet(nn.Module):
 
 
 class ConvPokeNet(nn.Module):
-    def __init__(self, filter1=16, filter2=32, filter3=64, linear1=1000, linear2=500, linear3=100, stride=10):
+    def __init__(self, filter1=16, filter2=32, filter3=64, linear1=1000, linear2=500, linear3=100):
         super(ConvPokeNet, self).__init__()
-        self.conv1 = nn.Conv1d(2, filter1, 9)
+        self.conv1 = nn.Conv1d(1, filter1, 9)
         self.conv2 = nn.Conv1d(filter1, filter1, 9)
         self.pool1 = nn.MaxPool1d(10)
         self.conv3 = nn.Conv1d(filter1, filter2, 9)

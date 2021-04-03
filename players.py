@@ -45,7 +45,7 @@ class PokeZero(Player):
         super(PokeZero, self).__init__(server_configuration=server_configuration,
                                        player_configuration=player_configuration)
         self.model = net
-        self.prev_gs_action = torch.empty(self.gs_action_vector_max_size)
+        # self.prev_gs_action = torch.empty(self.gs_action_vector_max_size)
 
     def get_model_input(self, gs, action_vector):
         model_input = np.concatenate((gs, action_vector))
@@ -56,12 +56,10 @@ class PokeZero(Player):
             print(model_input.shape)
             raise e
         model_input = torch.from_numpy(model_input)
-        c = torch.stack((model_input, self.prev_gs_action))
-        self.prev_gs_action = model_input
-        model_input = torch.unsqueeze(c, 0)
-        # model_input = torch.unsqueeze(torch.unsqueeze(
-        #     torch.from_numpy(model_input), 0), 0).float()
-        # model_input = torch.from_numpy(model_input)
+        # c = torch.stack((model_input, self.prev_gs_action))
+        # self.prev_gs_action = model_input
+        # model_input = torch.unsqueeze(c, 0)
+        model_input = torch.unsqueeze(torch.unsqueeze(model_input, 0), 0)
         return model_input.float()
 
     def choose_move(self, battle: AbstractBattle) -> BattleOrder:
