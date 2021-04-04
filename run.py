@@ -12,6 +12,9 @@ parser = argparse.ArgumentParser(description='Use new model or continue from sav
 parser.add_argument('--new', help="use brand new model", action="store_true")
 args = parser.parse_args()
 
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+print("Using {} device".format(device))
+
 training_cycles = 1
 if args.new:
     net = ConvPokeNet()
