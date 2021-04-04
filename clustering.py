@@ -26,7 +26,8 @@ def transform_dataset(dataset: dict):
 def preclustering(X):
     """Returns projection of X onto a lower dimension space"""
     pca = PCA(n_components=100)
-    return pca.fit_transform(X)
+    X = pcs.fit_transform(X)
+    return X
 
 
 def labels_array(X):
