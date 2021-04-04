@@ -34,7 +34,7 @@ def labels_array(X):
     """Returns an array of indices indicating which cluster the corresponding sample of X belongs to"""
     best_silhouette_score = -1
     best_cluster_labels = None
-    max_n_clusters = 1000
+    max_n_clusters = 200
     min_n_clusters = 100
     silhouette_scores = []
     for n_clusters in range(min_n_clusters, max_n_clusters + 1, 50):

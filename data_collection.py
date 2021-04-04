@@ -54,6 +54,7 @@ class Arena():
         with open("datasets/dataset{}.pickle".format(self.dataset_num), 'wb') as fout:
             pickle.dump(self.dataset, fout)
         self.dataset_num += 1
+        return self.dataset
 
     async def _evaluate_helper(self):
         players = [self.player1, self.random_player, self.max_damage_player]

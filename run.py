@@ -1,20 +1,18 @@
-import time
-
 from poke_env.server_configuration import LocalhostServerConfiguration
 
-from clustering import *
+from clustering import get_model_training_data, transform_dataset
 from data_collection import Arena
+from learning import learn, preprocessing
 from model import ConvPokeNet
 
+training_cycles = 1
 net = ConvPokeNet()
 arena = Arena(net, LocalhostServerConfiguration)
 
-arena.play_n_games(100)
-arena.save_dataset()
-# arena.evaluate()
-
-X, y = load_dataset(0)
-start_time = time.time()
-labels = labels_array(X)
-win_rate = win_rates(labels, y)
-print("--- %s seconds ---" % (time.time() - start_time))
+for _ in range(training_cycles):
+    arena.play_n_games(100)
+    dataset = arena.save_dataset()
+    X, y = transform_dataset(dataset)
+    model_input, model_labels = get_model_training_data(X, y)
+    trainloader = preprocessing(model_input, model_labels)
+    learn(trainloader, net)
