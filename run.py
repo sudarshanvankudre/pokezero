@@ -12,18 +12,21 @@ parser = argparse.ArgumentParser(description='Use new model or continue from sav
 parser.add_argument('--new', help="use brand new model", action="store_true")
 args = parser.parse_args()
 
-training_cycles = 1
+training_cycles = 20
 if args.new:
     net = ConvPokeNet()
 else:
     net = torch.load("poke_conv.pt")
 arena = Arena(net, LocalhostServerConfiguration)
 
-for _ in range(training_cycles):
+for cycle in range(training_cycles):
+    print("Training cycle {}".format(cycle))
     arena.play_n_games(100)
     dataset = arena.save_dataset()
+    print("Massaging data...")
     X, y = transform_dataset(dataset)
     model_input, model_labels = get_model_training_data(X, y)
     trainloader = preprocessing(model_input, model_labels)
+    print("Learning...")
     learn(trainloader, net)
     torch.save(net, "poke_conv.pt")
