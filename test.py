@@ -17,7 +17,7 @@ parser.add_argument('-n', help="number of test battles", type=int, default=100)
 args = parser.parse_args()
 if args.conv:
     print("using saved convolutional model")
-    net = torch.load("conv_model.pt")
+    net = torch.load("promising_models/conv_model1.pt")
 elif args.res:
     print("using saved residual model")
     net = torch.load("res_model.pt")
@@ -42,7 +42,7 @@ num_games = args.n
 
 
 async def main():
-    await pokezero.battle_against(max_damage_player, num_games)
+    await pokezero.battle_against(random_player, num_games)
 
 
 asyncio.get_event_loop().run_until_complete(main())

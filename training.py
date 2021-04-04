@@ -1,6 +1,7 @@
 import argparse
 import asyncio
 import random
+import pickle
 
 import matplotlib.pyplot as plt
 import torch
@@ -160,8 +161,9 @@ def play_train_loop(model=None, training_cycles=1, model_type="fc"):
         elif model_type == "res":
             torch.save(model, "res_model.pt")
             print(f"model saved to {model_type}_model.pt")
-
-    graph_losses(losses)
+    with open("losses.pickle", "wb") as f:
+        pickle.dump(losses, f)
+    # graph_losses(losses)
 
 
 play_train_loop(model=net, training_cycles=args.c, model_type=model_type)
