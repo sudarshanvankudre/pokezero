@@ -30,3 +30,5 @@ for cycle in range(training_cycles):
     print("Learning...")
     learn(trainloader, net)
     torch.save(net, "poke_conv.pt")
+    print("Evaluation")
+    arena.evaluate()
