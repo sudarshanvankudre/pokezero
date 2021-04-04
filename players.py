@@ -39,7 +39,7 @@ def get_action_vector(action):
 
 
 class PokeZero(Player):
-    gs_action_vector_max_size = 12897
+    gs_action_vector_max_size = 12909
 
     def __init__(self, server_configuration, net, player_configuration=None):
         super(PokeZero, self).__init__(server_configuration=server_configuration,
