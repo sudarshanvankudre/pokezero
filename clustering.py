@@ -25,16 +25,14 @@ def transform_dataset(dataset: dict):
 
 def preclustering(X):
     """Returns projection of X onto a lower dimension space"""
-    pca = PCA(n_components=100)
-    X = pcs.fit_transform(X)
-    return X
+    return PCA(n_components=100).fit_transform(X)
 
 
 def labels_array(X):
     """Returns an array of indices indicating which cluster the corresponding sample of X belongs to"""
     # best_silhouette_score = -1
     # best_cluster_labels = None
-    num_clusters = 500
+    num_clusters = 1000
     clusterer = MiniBatchKMeans(n_clusters=num_clusters, random_state=10, compute_labels=True)
     clusterer.fit(X)
     cluster_labels = clusterer.labels_
@@ -74,7 +72,4 @@ def win_rates(cluster_labels, y):
 
 
 def get_model_training_data(X, y):
-    trans_X = preclustering(X)
-    labels = labels_array(trans_X)
-    win_rate = win_rates(labels, y)
-    return X, win_rate
+    return X, win_rates(labels_array(preclustering(X)), y)
