@@ -15,7 +15,7 @@ def preprocessing(X, y):
 
 
 def learn(trainloader, model):
-    num_epochs = 2
+    num_epochs = 1 
     criterion = nn.MSELoss()
     optimizer = optim.Adam(list(model.parameters()), lr=1e-5)
     model.train()
@@ -29,7 +29,7 @@ def learn(trainloader, model):
             loss.backward()
             optimizer.step()
             running_loss += loss.item()
-            if i % 100 == 99:  # print every 2000 mini-batches
+            if i % 100 == 99:  # print every 100 mini-batches
                 print('[%d, %5d] loss: %.3f' %
                       (epoch + 1, i + 1, running_loss / 100))
                 running_loss = 0.0
