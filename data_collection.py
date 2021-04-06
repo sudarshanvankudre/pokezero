@@ -61,17 +61,7 @@ class Arena():
         return self.dataset
 
     async def _evaluate_helper(self):
-        players = [self.player1, self.random_player, self.max_damage_player]
-        cross_evaluation = await cross_evaluate(players, n_challenges=20)
-        # Defines a header for displaying results
-        table = [["-"] + [p.username for p in players]]
-
-        # Adds one line per player with corresponding results
-        for p_1, results in cross_evaluation.items():
-            table.append([p_1] + [cross_evaluation[p_1][p_2] for p_2 in results])
-
-        # Displays results in a nicely formatted table.
-        print(tabulate(table))
+        num_games = 10
 
     def evaluate(self):
         print("Evaluating performance")

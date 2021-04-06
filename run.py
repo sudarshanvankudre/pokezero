@@ -8,14 +8,17 @@ from data_collection import Arena
 from learning import learn, preprocessing
 from model import ConvPokeNet
 
-parser = argparse.ArgumentParser(description='Use new model or continue from saved')
+parser = argparse.ArgumentParser(
+    description='Use new model or continue from saved')
 parser.add_argument('--new', help="use brand new model", action="store_true")
 args = parser.parse_args()
 
 training_cycles = 20
 if args.new:
+    print("Using new model")
     net = ConvPokeNet()
 else:
+    print("Using saved model")
     net = torch.load("poke_conv.pt")
 arena = Arena(net, LocalhostServerConfiguration)
 
@@ -34,4 +37,3 @@ for cycle in range(training_cycles):
     torch.save(net, "poke_conv.pt")
     print("Evaluation")
     arena.evaluate()
-

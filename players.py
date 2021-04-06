@@ -25,12 +25,6 @@ class MaxDamagePlayer(Player):
             return self.choose_random_move(battle)
 
 
-class MyRandomPlayer(Player):
-    def choose_move(self, battle: AbstractBattle) -> BattleOrder:
-        print(battle.active_pokemon)
-        return self.choose_random_move(battle)
-
-
 def get_action_vector(action):
     if type(action) is Move:
         return move_name_onehot_vector(action.id)
@@ -67,34 +61,41 @@ class PokeZero(Player):
 
 
 class PokeZeroStudent(PokeZero):
+
     def __init__(self, server_config, net):
         super().__init__(server_config, net)
         self.gs_actions = list()
+        self.epsilon = 1.0
+        self.decay = 0.99
 
     def choose_move(self, battle: AbstractBattle) -> BattleOrder:
         self.model.eval()
-        if battle.turn > 500:
-            return self.choose_random_move(battle)
-        gs = game_state(battle)
-        best_action = None
-        best_gs_action = None
-        best_value = -float('inf')
         if battle.trapped:
             given_actions = battle.available_moves
         else:
             given_actions = battle.available_moves + battle.available_switches
         if len(given_actions) == 0:
             return self.choose_random_move(battle)
-        for action in given_actions:
-            action_vector = get_action_vector(action)
-            model_input = self.get_model_input(gs, action_vector)
-            with torch.no_grad():
-                value = self.model(model_input)
-            if value > best_value:
-                best_action = action
-                best_gs_action = model_input
-                best_value = value
+        gs = game_state(battle)
+        best_action = None
+        best_gs_action = None
+        best_value = -float('inf')
+        if random.random() < self.epsilon:
+            best_action = random.choice(given_actions)
+            best_gs_action = self.get_model_input(
+                gs, get_action_vector(best_action))
+        else:
+            for action in given_actions:
+                action_vector = get_action_vector(action)
+                model_input = self.get_model_input(gs, action_vector)
+                with torch.no_grad():
+                    value = self.model(model_input)
+                if value > best_value:
+                    best_action = action
+                    best_gs_action = model_input
+                    best_value = value
         self.gs_actions.append(best_gs_action)
+        self.epsilon *= self.decay
         return self.create_order(best_action)
 
 
