@@ -13,9 +13,9 @@ class Arena():
     max_damage_player = MaxDamagePlayer()
 
     def __init__(self, model: nn.Module, server_config: ServerConfiguration):
-        self.server_config = server_config
         self.player1 = PokeZeroStudent(server_config, model)
         self.player2 = PokeZeroStudent(server_config, model)
+        self.pokezero_eval = PokeZeroEval(server_config, model)
         self.model = model
         self.dataset = dict()
         self.p1_battles_won = 0
@@ -61,14 +61,14 @@ class Arena():
 
     async def _evaluate_helper(self):
         num_games = 10
-        pokezero = PokeZeroEval(self.server_config, self.model)
-        await pokezero.battle_against(self.random_player, num_games)
-        random_win_rate = pokezero.n_won_battles / num_games
+        self.pokezero_eval.reset_battles()
+        await self.pokezero_eval.battle_against(self.random_player, num_games)
+        random_win_rate = self.pokezero_eval.n_won_battles / num_games
         with open("vs_random_results.txt", "w") as fout:
             fout.write(str(random_win_rate) + "\n")
-        pokezero.reset_battles()
-        await pokezero.battle_against(self.max_damage_player, num_games)
-        max_damage_win_rate = pokezero.n_won_battles / num_games
+        self.pokezero_eval.reset_battles()
+        await self.pokezero_eval.battle_against(self.max_damage_player, num_games)
+        max_damage_win_rate = self.pokezero_eval.n_won_battles / num_games
         with open("vs_max_damage_results.txt", "w") as fout:
             fout.write(str(max_damage_win_rate) + "\n")
         print(f"num games: {num_games}")
