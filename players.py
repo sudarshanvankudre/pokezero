@@ -67,6 +67,7 @@ class PokeZeroStudent(PokeZero):
         self.gs_actions = list()
         self.epsilon = 1.0
         self.decay = 0.99
+        self.turn_limit = 500
 
     def choose_move(self, battle: AbstractBattle) -> BattleOrder:
         self.model.eval()
@@ -80,7 +81,7 @@ class PokeZeroStudent(PokeZero):
         best_action = None
         best_gs_action = None
         best_value = -float('inf')
-        if random.random() < self.epsilon:
+        if random.random() < self.epsilon or battle.turn >= self.turn_limit:
             best_action = random.choice(given_actions)
             best_gs_action = self.get_model_input(
                 gs, get_action_vector(best_action))

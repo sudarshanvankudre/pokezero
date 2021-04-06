@@ -49,7 +49,7 @@ class Arena():
     def play_n_games(self, n):
         for i in range(n):
             if i % 10 == 0:
-                print("Game {}".format(i))
+                print(f"Game {i}")
             asyncio.get_event_loop().run_until_complete(self.play())
             self.update_dataset()
 
