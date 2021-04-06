@@ -21,33 +21,23 @@ class FCPokeNet(nn.Module):
 
 
 class ConvPokeNet(nn.Module):
-    def __init__(self, filter1=16, filter2=32, filter3=64, linear1=4000, linear2=500, linear3=100, kernel_size=9):
+    def __init__(self, filter1=16, filter2=32, linear1=4000, kernel_size=9):
         super(ConvPokeNet, self).__init__()
         self.conv1 = nn.Conv1d(1, filter1, kernel_size)
         self.conv2 = nn.Conv1d(filter1, filter2, kernel_size)
-        self.pool1 = nn.MaxPool1d(10)
+        self.pool = nn.MaxPool1d(10)
         self.conv3 = nn.Conv1d(filter2, filter2, kernel_size)
         self.conv4 = nn.Conv1d(filter2, filter2, kernel_size)
-        # self.pool2 = nn.MaxPool1d(6)
-        # self.conv5 = nn.Conv1d(filter2, filter3, 9)
-        # self.conv6 = nn.Conv1d(filter3, filter3, 9)
-        # self.pool3 = nn.MaxPool1d(4)
         self.fc1 = nn.Linear(3840, linear1)
-        # self.batchnorm1 = nn.BatchNorm1d(linear1)
         self.fc2 = nn.Linear(linear1, 1)
-        # self.batchnorm2 = nn.BatchNorm1d(linear2)
-        # self.fc3 = nn.Linear(linear2, linear3)
-        # self.batchnorm3 = nn.BatchNorm1d(linear3)
-        # self.fc4 = nn.Linear(linear3, 1)
 
     def forward(self, x):
         x = F.relu(self.conv1(x))
         x = F.relu(self.conv2(x))
-        x = self.pool1(x)
+        x = self.pool(x)
         x = F.relu(self.conv3(x))
-        x = self.pool1(x)
+        x = self.pool(x)
         x = F.relu(self.conv4(x))
-        # x = F.relu(self.conv6(F.relu(self.conv5(x))))
         n = x.shape[0]
         x = torch.reshape(x, (n, x.shape[1] * x.shape[2]))
         x = torch.tanh(self.fc1(x))
