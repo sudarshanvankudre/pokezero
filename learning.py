@@ -8,6 +8,7 @@ def preprocessing(X, y):
     """Returns a DataLoader over X and y"""
     X = torch.Tensor(X)
     y = torch.Tensor(y)
+    y += torch.normal(mean=0.0, std=0.01, size=y.shape)
     train_data = []
     for i in range(len(X)):
         train_data.append([torch.unsqueeze(X[i], 0), y[i]])
@@ -15,7 +16,7 @@ def preprocessing(X, y):
 
 
 def learn(trainloader, model):
-    num_epochs = 1 
+    num_epochs = 1
     criterion = nn.MSELoss()
     optimizer = optim.Adam(list(model.parameters()), lr=1e-5)
     model.train()
