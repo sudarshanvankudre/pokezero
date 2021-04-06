@@ -62,11 +62,10 @@ class PokeZero(Player):
 
 class PokeZeroStudent(PokeZero):
 
-    def __init__(self, server_config, net):
+    def __init__(self, server_config, net, epsilon):
         super().__init__(server_config, net)
         self.gs_actions = list()
-        self.epsilon = 1.0
-        self.decay = 0.99
+        self.epsilon = epsilon
         self.turn_limit = 500
 
     def choose_move(self, battle: AbstractBattle) -> BattleOrder:
@@ -96,7 +95,6 @@ class PokeZeroStudent(PokeZero):
                     best_gs_action = model_input
                     best_value = value
         self.gs_actions.append(best_gs_action)
-        self.epsilon *= self.decay
         return self.create_order(best_action)
 
 
