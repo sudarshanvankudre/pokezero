@@ -40,13 +40,17 @@ class Arena():
                 self.dataset[gs_action] = 1
             self.p2_battles_won += 1
         else:
-            print("Battle was a tie")
+            for gs_action in self.player1.gs_actions:
+                self.dataset[gs_action] = 0
+            for gs_action in self.player2.gs_actions:
+                self.dataset[gs_action] = 0
         self.player1.gs_actions = []
         self.player2.gs_actions = []
 
     def play_n_games(self, n):
         for i in range(n):
-            print("Game {}".format(i))
+            if i % 10 == 0:
+                print("Game {}".format(i))
             asyncio.get_event_loop().run_until_complete(self.play())
             self.update_dataset()
 

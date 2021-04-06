@@ -23,8 +23,10 @@ for cycle in range(training_cycles):
     print("Training cycle {}".format(cycle))
     arena.play_n_games(100)
     dataset = arena.save_dataset()
+    arena.dataset = {}
     print("Massaging data...")
     X, y = transform_dataset(dataset)
+    del dataset
     X, y = get_model_training_data(X, y)
     trainloader = preprocessing(X, y)
     print("Learning...")
@@ -32,3 +34,4 @@ for cycle in range(training_cycles):
     torch.save(net, "poke_conv.pt")
     print("Evaluation")
     arena.evaluate()
+

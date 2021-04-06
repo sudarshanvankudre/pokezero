@@ -8,6 +8,7 @@ battle_environment_url = "https://poke-env.readthedocs.io/en/stable/other_enviro
 
 
 def load_random_battle_pool():
+    print("Loading random battle pool")
     r = requests.get(gen8_random_battle_url)
     random_battle_pool = [s[:len(s) - 3] for s in filter(lambda s: s[0].isupper(), re.findall(r"[^ ]*?: {", r.text))]
     with open("../random_battle_pokemonset.txt", 'w') as fout:
@@ -16,6 +17,7 @@ def load_random_battle_pool():
 
 
 def load_random_battle_moveset():
+    print("Loading random battle move pool")
     r = requests.get(gen8_random_battle_url)
     moves = set()
     for move_list in map(lambda s: eval(s[7:]), re.findall(r"moves: \[.*?]", r.text)):
@@ -27,6 +29,7 @@ def load_random_battle_moveset():
 
 
 def load_random_battle_itemset():
+    print("Loading random battle item pool")
     r = requests.get(gen8_random_battle_url)
     items = set()
     for item_list in map(lambda s: eval(s[7:]), re.findall(r"items: \[.*?]", r.text)):
@@ -38,6 +41,7 @@ def load_random_battle_itemset():
 
 
 def load_random_battle_abilityset():
+    print("Loading random battle ability pool")
     r = requests.get(gen8_random_battle_url)
     abilities = set()
     for ability_list in map(lambda s: eval(s[11:]), re.findall(r"abilities: \[.*?]", r.text)):
@@ -49,6 +53,7 @@ def load_random_battle_abilityset():
 
 
 def load_effects():
+    print("Loading effects")
     r = requests.get(battle_environment_url)
     soup = BeautifulSoup(r.text, 'html.parser').find("div",
                                                      {"class": "section", "id": "module-poke_env.environment.effect"})
