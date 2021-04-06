@@ -99,6 +99,32 @@ class PokeZeroStudent(PokeZero):
         return self.create_order(best_action)
 
 
+class PokeZeroEval(PokeZero):
+    def __init__(self, server_config, net):
+        super(PokeZeroEval, self).__init__(server_config, net)
+
+    def choose_move(self, battle: AbstractBattle) -> BattleOrder:
+        self.model.eval()
+        if battle.trapped:
+            given_actions = battle.available_moves
+        else:
+            given_actions = battle.available_moves + battle.available_switches
+        if len(given_actions) == 0:
+            return self.choose_random_move(battle)
+        gs = game_state(battle)
+        best_action = None
+        best_value = -float('inf')
+        for action in given_actions:
+            action_vector = get_action_vector(action)
+            model_input = self.get_model_input(gs, action_vector)
+            with torch.no_grad():
+                value = self.model(model_input)
+            if value > best_value:
+                best_action = action
+                best_value = value
+        return self.create_order(best_action)
+
+
 class PokeZeroTrain(PokeZero):
     def __init__(self, server_configuration, net, exploration=1, decay=1):
         super().__init__(server_configuration=server_configuration, net=net)

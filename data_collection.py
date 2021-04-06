@@ -2,12 +2,10 @@ import asyncio
 import pickle
 
 from poke_env.player.random_player import RandomPlayer
-from poke_env.player.utils import cross_evaluate
 from poke_env.server_configuration import ServerConfiguration
-from tabulate import tabulate
 from torch import nn
 
-from players import MaxDamagePlayer, PokeZeroStudent
+from players import MaxDamagePlayer, PokeZeroStudent, PokeZeroEval
 
 
 class Arena():
@@ -15,6 +13,7 @@ class Arena():
     max_damage_player = MaxDamagePlayer()
 
     def __init__(self, model: nn.Module, server_config: ServerConfiguration):
+        self.server_config = server_config
         self.player1 = PokeZeroStudent(server_config, model)
         self.player2 = PokeZeroStudent(server_config, model)
         self.model = model
@@ -62,7 +61,19 @@ class Arena():
 
     async def _evaluate_helper(self):
         num_games = 10
+        pokezero = PokeZeroEval(self.server_config, self.model)
+        await pokezero.battle_against(self.random_player, num_games)
+        random_win_rate = pokezero.n_won_battles / num_games
+        with open("vs_random_results.txt", "w") as fout:
+            fout.write(str(random_win_rate) + "\n")
+        pokezero.reset_battles()
+        await pokezero.battle_against(self.max_damage_player, num_games)
+        max_damage_win_rate = pokezero.n_won_battles / num_games
+        with open("vs_max_damage_results.txt", "w") as fout:
+            fout.write(str(max_damage_win_rate) + "\n")
+        print(f"num games: {num_games}")
+        print(f"vs random: {random_win_rate}")
+        print(f"vs max damage: {max_damage_win_rate}")
 
     def evaluate(self):
-        print("Evaluating performance")
         asyncio.get_event_loop().run_until_complete(self._evaluate_helper())
