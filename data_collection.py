@@ -23,7 +23,7 @@ class Arena():
         self.p1_battles_won = 0
         self.p2_battles_won = 0
         self.dataset_num = 0
-        self.decay = 0.99
+        self.decay = 1
 
     async def play(self):
         opponent = random.choice([self.pokezero2, self.random_player, self.max_damage_player])
