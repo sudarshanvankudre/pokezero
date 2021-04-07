@@ -1,5 +1,6 @@
 import asyncio
 import pickle
+import random
 
 from poke_env.player.random_player import RandomPlayer
 from poke_env.server_configuration import ServerConfiguration
@@ -14,8 +15,8 @@ class Arena():
 
     def __init__(self, model: nn.Module, server_config: ServerConfiguration):
         self.epsilon = 1.0
-        self.player1 = PokeZeroStudent(server_config, model, self.epsilon)
-        self.player2 = PokeZeroStudent(server_config, model, self.epsilon)
+        self.pokezero1 = PokeZeroStudent(server_config, model, self.epsilon)
+        self.pokezero2 = PokeZeroStudent(server_config, model, self.epsilon)
         self.pokezero_eval = PokeZeroEval(server_config, model)
         self.model = model
         self.dataset = dict()
@@ -25,35 +26,36 @@ class Arena():
         self.decay = 0.99
 
     async def play(self):
-        await self.player1.battle_against(self.player2, 1)
+        opponent = random.choice([self.pokezero2, self.random_player, self.max_damage_player])
+        await self.pokezero1.battle_against(opponent, 1)
 
     def update_dataset(self):
-        if self.player1.n_won_battles == self.p1_battles_won + 1:
-            for gs_action in self.player1.gs_actions:
+        if self.pokezero1.n_won_battles == self.p1_battles_won + 1:
+            for gs_action in self.pokezero1.gs_actions:
                 self.dataset[gs_action] = 1
-            for gs_action in self.player2.gs_actions:
+            for gs_action in self.pokezero2.gs_actions:
                 self.dataset[gs_action] = 0
             self.p1_battles_won += 1
-        elif self.player2.n_won_battles == self.p2_battles_won + 1:
-            for gs_action in self.player1.gs_actions:
+        elif self.pokezero2.n_won_battles == self.p2_battles_won + 1:
+            for gs_action in self.pokezero1.gs_actions:
                 self.dataset[gs_action] = 0
-            for gs_action in self.player2.gs_actions:
+            for gs_action in self.pokezero2.gs_actions:
                 self.dataset[gs_action] = 1
             self.p2_battles_won += 1
         else:
-            for gs_action in self.player1.gs_actions:
+            for gs_action in self.pokezero1.gs_actions:
                 self.dataset[gs_action] = 0
-            for gs_action in self.player2.gs_actions:
+            for gs_action in self.pokezero2.gs_actions:
                 self.dataset[gs_action] = 0
-        self.player1.gs_actions = []
-        self.player2.gs_actions = []
+        self.pokezero1.gs_actions = []
+        self.pokezero2.gs_actions = []
 
     def play_n_games(self, n):
         for i in range(n):
             if i % 10 == 0:
                 print(f"Game {i}")
-            self.player1.epsilon = self.epsilon
-            self.player2.epsilon = self.epsilon
+            self.pokezero1.epsilon = self.epsilon
+            self.pokezero2.epsilon = self.epsilon
             asyncio.get_event_loop().run_until_complete(self.play())
             self.update_dataset()
             self.epsilon *= self.decay
