@@ -16,7 +16,7 @@ def preprocessing(X, y):
 
 
 def learn(trainloader, model):
-    num_epochs = 2
+    num_epochs = 1
     criterion = nn.MSELoss()
     optimizer = optim.Adam(list(model.parameters()), lr=1e-5)
     model.train()

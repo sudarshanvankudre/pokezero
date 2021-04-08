@@ -1,4 +1,5 @@
 from collections import Counter
+from collections import Counter
 from multiprocessing import Pool
 
 import numpy as np
