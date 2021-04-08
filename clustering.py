@@ -31,12 +31,21 @@ def preclustering(X):
 def labels_array(X):
     """Returns an array of indices indicating which cluster the corresponding sample of X belongs to"""
     num_clusters = 1000
-    clusterer = MiniBatchKMeans(n_clusters=num_clusters, random_state=10, compute_labels=True)
-    clusterer.fit(X)
-    cluster_labels = clusterer.labels_
-    silhouette_avg = silhouette_score(X, cluster_labels)
-    print("Silhouette score:", silhouette_avg)
-    return cluster_labels
+    min_clusters = 500
+    max_clusters = 1200
+    best_labels = None
+    best_score = -1
+    for num in range(min_clusters, max_clusters + 1, 100):
+        clusterer = MiniBatchKMeans(
+            n_clusters=num, random_state=10, compute_labels=True)
+        clusterer.fit(X)
+        cluster_labels = clusterer.labels_
+        silhouette_avg = silhouette_score(X, cluster_labels)
+        if silhouette_avg > best_score:
+            best_score = silhouette_avg
+            best_labels = cluster_labels
+    print("Silhouette score:", best_score)
+    return best_labels
 
 
 def win_rates(cluster_labels, y):

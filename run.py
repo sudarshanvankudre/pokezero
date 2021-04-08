@@ -25,11 +25,9 @@ arena = Arena(net, LocalhostServerConfiguration)
 for cycle in range(training_cycles):
     print("Training cycle {}".format(cycle))
     arena.play_n_games(100)
-    dataset = arena.save_dataset()
-    arena.dataset = {}
     print("Massaging data...")
-    X, y = transform_dataset(dataset)
-    del dataset
+    X, y = transform_dataset(arena.dataset)
+    arena.dataset = {}
     X, y = get_model_training_data(X, y)
     trainloader = preprocessing(X, y)
     print("Learning...")

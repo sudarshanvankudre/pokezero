@@ -9,7 +9,7 @@ from torch import nn
 from players import MaxDamagePlayer, PokeZeroStudent, PokeZeroEval
 
 
-class Arena():
+class Arena:
     random_player = RandomPlayer()
     max_damage_player = MaxDamagePlayer()
 
@@ -22,7 +22,6 @@ class Arena():
         self.dataset = dict()
         self.p1_battles_won = 0
         self.p2_battles_won = 0
-        self.dataset_num = 0
         self.decay = 0.99
 
     async def play(self):
@@ -59,12 +58,6 @@ class Arena():
             asyncio.get_event_loop().run_until_complete(self.play())
             self.update_dataset()
             self.epsilon *= self.decay
-
-    def save_dataset(self):
-        with open("datasets/dataset{}.pickle".format(self.dataset_num), 'wb') as fout:
-            pickle.dump(self.dataset, fout)
-        self.dataset_num += 1
-        return self.dataset
 
     async def _evaluate_helper(self):
         num_games = 10
