@@ -2,8 +2,6 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
-device = 'cuda' if torch.cuda.is_available() else 'cpu'
-
 
 class FCPokeNet(nn.Module):
     def __init__(self):
