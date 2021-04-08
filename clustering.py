@@ -1,19 +1,11 @@
-import pickle
 from collections import Counter
+from multiprocessing import Process, Queue, cpu_count
 
 import numpy as np
 import torch
 from sklearn.cluster import MiniBatchKMeans
 from sklearn.decomposition import PCA
 from sklearn.metrics import silhouette_score
-from multiprocessing import Pool
-
-
-def load_dataset(dataset: int) -> dict:
-    """Loads dataset from disk and returns it in train test format"""
-    with open("datasets/dataset{}.pickle".format(dataset), 'rb') as fin:
-        dataset = pickle.load(fin)
-    return dataset
 
 
 def transform_dataset(dataset: dict):
@@ -29,23 +21,56 @@ def preclustering(X):
     return PCA(n_components=100).fit_transform(X)
 
 
+def split_range(low, high, num_buckets):
+    """Returns buckets ranges, splitting [low, high]
+    """
+    ranges = []
+    div = (high - low) // num_buckets
+    for i in range(num_buckets):
+        if i == num_buckets - 1:
+            ranges.append((i * div + low, high + 1))
+        else:
+            ranges.append((i * div + low, div * (i + 1) + low))
+    return ranges
+
+
 def labels_array(X):
     """Returns an array of indices indicating which cluster the corresponding sample of X belongs to"""
-    def num_clusters_test(num):
-        clusterer = MiniBatchKMeans(
-            n_clusters=num, random_state=10, compute_labels=True)
-        clusterer.fit(X)
-        cluster_labels = clusterer.labels_
-        return silhouette_score(X, cluster_labels), cluster_labels
+
+    def num_clusters_search(r: tuple, q: Queue):
+        best_score = -1
+        best_labels = None
+        for num_clusters in range(r[0], r[1], 15):
+            clusterer = MiniBatchKMeans(
+                n_clusters=num_clusters, compute_labels=True)
+            clusterer.fit(X)
+            score = silhouette_score(X, clusterer.labels_)
+            if score > best_score:
+                best_labels = clusterer.labels_
+                best_score = score
+        q.put((best_score, best_labels))
 
     min_clusters = 500
     max_clusters = 1200
-
-    with Pool() as p:
-        results = p.map(num_clusters_test, range(
-            min_clusters, max_clusters, 10))
-
-    return max(results, key=lambda p: p[0])[1]
+    ranges = split_range(min_clusters, max_clusters, cpu_count())
+    q = Queue()
+    processes = []
+    for r in ranges:
+        p = Process(target=num_clusters_search, args=(r, q))
+        p.start()
+        processes.append(p)
+    for p in processes:
+        p.join()
+    q.put("DONE")
+    best_score = -1
+    best_labels = None
+    while (element := q.get()) != "DONE":
+        score = element[0]
+        if score > best_score:
+            best_labels = element[1]
+            best_score = score
+    print(f"sillouette score: {best_score}")
+    return best_labels
 
 
 def win_rates(cluster_labels, y):

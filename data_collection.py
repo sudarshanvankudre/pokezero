@@ -1,5 +1,4 @@
 import asyncio
-import pickle
 import random
 
 from poke_env.player.random_player import RandomPlayer

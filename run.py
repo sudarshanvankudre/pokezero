@@ -13,7 +13,7 @@ parser = argparse.ArgumentParser(
 parser.add_argument('--new', help="use brand new model", action="store_true")
 args = parser.parse_args()
 
-training_cycles = 20
+training_cycles = 1
 if args.new:
     print("Using new model")
     net = ConvPokeNet()
@@ -24,7 +24,7 @@ arena = Arena(net, LocalhostServerConfiguration)
 
 for cycle in range(training_cycles):
     print("Training cycle {}".format(cycle))
-    arena.play_n_games(100)
+    arena.play_n_games(50)
     print("Massaging data...")
     X, y = transform_dataset(arena.dataset)
     arena.dataset = {}
