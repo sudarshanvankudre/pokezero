@@ -1,4 +1,4 @@
-from collections import Counter
+import pickle
 from collections import Counter
 from multiprocessing import Pool
 
@@ -7,6 +7,13 @@ import torch
 from sklearn.cluster import MiniBatchKMeans
 from sklearn.decomposition import PCA
 from sklearn.metrics import silhouette_score
+
+
+def load_dataset(dataset: int) -> dict:
+    """Loads dataset from disk and returns it in train test format"""
+    with open("datasets/dataset{}.pickle".format(dataset), 'rb') as fin:
+        dataset = pickle.load(fin)
+    return dataset
 
 
 def transform_dataset(dataset: dict):
