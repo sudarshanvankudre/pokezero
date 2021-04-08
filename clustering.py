@@ -6,6 +6,7 @@ import torch
 from sklearn.cluster import MiniBatchKMeans
 from sklearn.decomposition import PCA
 from sklearn.metrics import silhouette_score
+from multiprocessing import Pool
 
 
 def load_dataset(dataset: int) -> dict:
@@ -30,22 +31,21 @@ def preclustering(X):
 
 def labels_array(X):
     """Returns an array of indices indicating which cluster the corresponding sample of X belongs to"""
-    num_clusters = 1000
-    min_clusters = 500
-    max_clusters = 1200
-    best_labels = None
-    best_score = -1
-    for num in range(min_clusters, max_clusters + 1, 100):
+    def num_clusters_test(num):
         clusterer = MiniBatchKMeans(
             n_clusters=num, random_state=10, compute_labels=True)
         clusterer.fit(X)
         cluster_labels = clusterer.labels_
-        silhouette_avg = silhouette_score(X, cluster_labels)
-        if silhouette_avg > best_score:
-            best_score = silhouette_avg
-            best_labels = cluster_labels
-    print("Silhouette score:", best_score)
-    return best_labels
+        return silhouette_score(X, cluster_labels), cluster_labels
+
+    min_clusters = 500
+    max_clusters = 1200
+
+    with Pool() as p:
+        results = p.map(num_clusters_test, range(
+            min_clusters, max_clusters, 10))
+
+    return max(results, key=lambda p: p[0])[1]
 
 
 def win_rates(cluster_labels, y):
