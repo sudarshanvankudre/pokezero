@@ -1,12 +1,12 @@
 import pickle
 from collections import Counter
+from multiprocessing import Pool
 
 import numpy as np
 import torch
 from sklearn.cluster import MiniBatchKMeans
 from sklearn.decomposition import PCA
 from sklearn.metrics import silhouette_score
-from multiprocessing import Pool
 
 
 def load_dataset(dataset: int) -> dict:
@@ -31,6 +31,7 @@ def preclustering(X):
 
 def labels_array(X):
     """Returns an array of indices indicating which cluster the corresponding sample of X belongs to"""
+
     def num_clusters_test(num):
         clusterer = MiniBatchKMeans(
             n_clusters=num, random_state=10, compute_labels=True)
